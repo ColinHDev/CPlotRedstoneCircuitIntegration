@@ -40,7 +40,7 @@ class BlockPistonEventListener implements Listener {
             return;
         }
         $plot = Plot::loadFromPositionIntoCache($position);
-        if (!($plot instanceof Plot)) {
+        if (!($plot instanceof Plot) || !$plot->isOnPlot($position->getSide($block->getPistonArmFace()))) {
             $event->cancel();
             return;
         }
