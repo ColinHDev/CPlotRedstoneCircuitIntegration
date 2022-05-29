@@ -1,5 +1,6 @@
 {
 	"name": "colinhdev/cplotredstonecircuitintegration",
+	"description": "CPlot addon for integrating the RedstoneCircuit plugin into plot worlds",
 	"require": {
 		"pocketmine/pocketmine-mp": "4.0.0",
 		"colinhdev/cplot": "dev-development",
