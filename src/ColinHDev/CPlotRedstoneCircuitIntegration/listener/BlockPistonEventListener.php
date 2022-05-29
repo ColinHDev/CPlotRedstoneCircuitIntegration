@@ -46,8 +46,7 @@ class BlockPistonEventListener implements Listener {
         }
 
         foreach ($event->getBreakBlocks() as $breakBlock) {
-            $plotOfBlock = Plot::loadFromPositionIntoCache($breakBlock->getPosition());
-            if (!($plotOfBlock instanceof Plot) || !$plot->isSame($plotOfBlock)) {
+            if (!$plot->isOnPlot($breakBlock->getPosition())) {
                 $event->cancel();
                 return;
             }
@@ -55,13 +54,11 @@ class BlockPistonEventListener implements Listener {
 
         $face = $event instanceof BlockPistonExtendEvent ? $block->getPistonArmFace() : Facing::opposite($block->getPistonArmFace());
         foreach ($event->getMoveBlocks() as $moveBlock) {
-            $plotOfBlock = Plot::loadFromPositionIntoCache($moveBlock->getPosition());
-            if (!($plotOfBlock instanceof Plot) || !$plot->isSame($plotOfBlock)) {
+            if (!$plot->isOnPlot($moveBlock->getPosition())) {
                 $event->cancel();
                 return;
             }
-            $plotOfBlock = Plot::loadFromPositionIntoCache($moveBlock->getSide($face)->getPosition());
-            if (!($plotOfBlock instanceof Plot) || !$plot->isSame($plotOfBlock)) {
+            if (!$plot->isOnPlot($moveBlock->getSide($face)->getPosition())) {
                 $event->cancel();
                 return;
             }
