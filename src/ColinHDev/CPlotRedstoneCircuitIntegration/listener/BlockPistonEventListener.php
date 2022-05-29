@@ -9,6 +9,7 @@ use ColinHDev\CPlot\provider\DataProvider;
 use ColinHDev\CPlot\worlds\NonWorldSettings;
 use ColinHDev\CPlot\worlds\WorldSettings;
 use pocketmine\event\Listener;
+use pocketmine\math\Facing;
 use tedo0627\redstonecircuit\event\BlockPistonExtendEvent;
 use tedo0627\redstonecircuit\event\BlockPistonRetractEvent;
 
@@ -29,7 +30,8 @@ class BlockPistonEventListener implements Listener {
     }
 
     private function onBlockPistonEvent(BlockPistonExtendEvent|BlockPistonRetractEvent $event) : void {
-        $position = $event->getBlock()->getPosition();
+        $block = $event->getPiston();
+        $position = $block->getPosition();
         $worldSettings = DataProvider::getInstance()->loadWorldIntoCache($position->getWorld()->getFolderName());
         if (!($worldSettings instanceof WorldSettings)) {
             if (!($worldSettings instanceof NonWorldSettings)) {
@@ -43,8 +45,22 @@ class BlockPistonEventListener implements Listener {
             return;
         }
 
-        foreach (array_merge($event->getBreakBlocks(), $event->getMoveBlocks()) as $block) {
-            $plotOfBlock = Plot::loadFromPositionIntoCache($block->getPosition());
+        foreach ($event->getBreakBlocks() as $breakBlock) {
+            $plotOfBlock = Plot::loadFromPositionIntoCache($breakBlock->getPosition());
+            if (!($plotOfBlock instanceof Plot) || !$plot->isSame($plotOfBlock)) {
+                $event->cancel();
+                return;
+            }
+        }
+
+        $face = $event instanceof BlockPistonExtendEvent ? $block->getPistonArmFace() : Facing::opposite($block->getPistonArmFace());
+        foreach ($event->getMoveBlocks() as $moveBlock) {
+            $plotOfBlock = Plot::loadFromPositionIntoCache($moveBlock->getPosition());
+            if (!($plotOfBlock instanceof Plot) || !$plot->isSame($plotOfBlock)) {
+                $event->cancel();
+                return;
+            }
+            $plotOfBlock = Plot::loadFromPositionIntoCache($moveBlock->getSide($face)->getPosition());
             if (!($plotOfBlock instanceof Plot) || !$plot->isSame($plotOfBlock)) {
                 $event->cancel();
                 return;
