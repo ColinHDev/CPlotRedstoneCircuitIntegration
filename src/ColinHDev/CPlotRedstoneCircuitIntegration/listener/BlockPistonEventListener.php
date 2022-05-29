@@ -54,11 +54,12 @@ class BlockPistonEventListener implements Listener {
 
         $face = $event instanceof BlockPistonExtendEvent ? $block->getPistonArmFace() : Facing::opposite($block->getPistonArmFace());
         foreach ($event->getMoveBlocks() as $moveBlock) {
-            if (!$plot->isOnPlot($moveBlock->getPosition())) {
+            $moveBlockPosition = $moveBlock->getPosition();
+            if (!$plot->isOnPlot($moveBlockPosition)) {
                 $event->cancel();
                 return;
             }
-            if (!$plot->isOnPlot($moveBlock->getSide($face)->getPosition())) {
+            if (!$plot->isOnPlot($moveBlockPosition->getSide($face))) {
                 $event->cancel();
                 return;
             }
