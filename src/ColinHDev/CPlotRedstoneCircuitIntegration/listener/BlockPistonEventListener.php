@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace ColinHDev\CPlotRedstoneCircuitIntegration\listener;
 
 use ColinHDev\CPlot\plots\Plot;
-use ColinHDev\CPlot\provider\DataProvider;
-use ColinHDev\CPlot\worlds\NonWorldSettings;
-use ColinHDev\CPlot\worlds\WorldSettings;
+use ColinHDev\CPlot\utils\APIHolder;
 use pocketmine\event\Listener;
 use pocketmine\math\Facing;
 use tedo0627\redstonecircuit\event\BlockPistonExtendEvent;
 use tedo0627\redstonecircuit\event\BlockPistonRetractEvent;
 
 class BlockPistonEventListener implements Listener {
+    use APIHolder;
 
     /**
      * @priority LOWEST
@@ -32,14 +31,16 @@ class BlockPistonEventListener implements Listener {
     private function onBlockPistonEvent(BlockPistonExtendEvent|BlockPistonRetractEvent $event) : void {
         $block = $event->getPiston();
         $position = $block->getPosition();
-        $worldSettings = DataProvider::getInstance()->loadWorldIntoCache($position->getWorld()->getFolderName());
-        if (!($worldSettings instanceof WorldSettings)) {
-            if (!($worldSettings instanceof NonWorldSettings)) {
+        /** @phpstan-var true|false|null $isPlotWorld */
+        $isPlotWorld = $this->getAPI("1.0.0")->isPlotWorld($position->getWorld())->getResult();
+        if ($isPlotWorld !== true) {
+            if ($isPlotWorld !== false) {
                 $event->cancel();
             }
             return;
         }
-        $plot = Plot::loadFromPositionIntoCache($position);
+        /** @phpstan-var Plot|false|null $plot */
+        $plot = $this->getAPI("1.0.0")->getOrLoadPlotAtPosition($position)->getResult();
         if (!($plot instanceof Plot) || !$plot->isOnPlot($position->getSide($block->getPistonArmFace()))) {
             $event->cancel();
             return;
